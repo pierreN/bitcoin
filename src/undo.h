@@ -36,7 +36,7 @@ struct TxInUndoFormatter
     void Unser(Stream &s, Coin& txout) {
         unsigned int nCode = 0;
         ::Unserialize(s, VARINT(nCode));
-        txout.nHeight = nCode / 2;
+        txout.nHeight = (nCode >> 1) & 0xFFFFFFF;
         txout.fCoinBase = nCode & 1;
         if (txout.nHeight > 0) {
             // Old versions stored the version number for the last spend of
