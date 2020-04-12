@@ -260,6 +260,7 @@ class CliCompletionTest(BitcoinTestFramework):
     def run_test(self):
         # self.config is not available in self.add_options, so complete filepaths here
         print("ENVIRONMENT: ", self.config["environment"])
+        print("CONF FILE: ", self.options.configfile)
         with open(self.options.configfile, 'r', encoding='utf-8') as conf:
             print(conf.read())
 
