@@ -257,21 +257,30 @@ class CliCompletionTest(BitcoinTestFramework):
                                  "where to find it using the --completion parameters ({}).")
                                  .format(self.options.completion, e))
 
+    def guess_path(self, cur_dir, filename):
+        """ Search SRCDIR/cur_dir or it's parents for the file filename. """
+        srcdir = self.config["environment"]["SRCDIR"]
+        while True:
+            this_path = path.join(srcdir, cur_dir, filename)
+            if path.exists(this_path):
+                return this_path
+
+            new_srcdir = path.dirname(srcdir)
+            if new_srcdir == srcdir:
+                return ""
+            else:
+                srcdir = new_srcdir
+
     def run_test(self):
         # self.config is not available in self.add_options, so complete filepaths here
-        print("ENVIRONMENT: ", self.config["environment"])
-        print("CONF FILE: ", self.options.configfile)
-        with open(self.options.configfile, 'r', encoding='utf-8') as conf:
-            print(conf.read())
-
-        srcdir = self.config["environment"]["SRCDIR"]
-        test_data_dir = path.join(srcdir, 'test', 'functional', 'data', 'completion')
+        data_dir = path.join('test', 'functional', 'data', 'completion')
         if self.options.header is None or len(self.options.header) == 0:
-            self.options.header = path.join(test_data_dir, 'bitcoin-cli.header.bash-completion')
+            self.options.header = self.guess_path(data_dir, 'bitcoin-cli.header.bash-completion')
         if self.options.footer is None or len(self.options.footer) == 0:
-            self.options.footer = path.join(test_data_dir, 'bitcoin-cli.footer.bash-completion')
+            self.options.footer = self.guess_path(data_dir, 'bitcoin-cli.footer.bash-completion')
         if self.options.completion is None or len(self.options.completion) == 0:
-            self.options.completion = path.join(srcdir, 'contrib', 'bitcoin-cli.bash-completion')
+            self.options.completion = self.guess_path(path.join('contrib'),
+                                                            'bitcoin-cli.bash-completion')
 
         self.log.info("Parsing help commands to get all commands arguments...")
         commands = self.nodes[0].help().split("\n")
