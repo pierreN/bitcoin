@@ -259,6 +259,10 @@ class CliCompletionTest(BitcoinTestFramework):
 
     def run_test(self):
         # self.config is not available in self.add_options, so complete filepaths here
+        print("ENVIRONMENT: ", self.config["environment"])
+        with open(self.options.configfile, 'r', encoding='utf-8') as conf:
+            print(conf.read())
+
         srcdir = self.config["environment"]["SRCDIR"]
         test_data_dir = path.join(srcdir, 'test', 'functional', 'data', 'completion')
         if self.options.header is None or len(self.options.header) == 0:
