@@ -54,14 +54,14 @@ if [ -z "$DANGER_RUN_CI_ON_HOST" ]; then
 
   DOCKER_EXEC () {
     docker exec $DOCKER_ID bash -c "export PATH=$BASE_SCRATCH_DIR/bins/:\$PATH && cd $P_CI_DIR && $*"
-    DCK_LS=$(docker exec $DOCKER_ID bash -c "pwd; ls")
+    DOCKER_LS=$(docker exec $DOCKER_ID bash -c "pwd; ls")
     echo "XXXXX1: DOCKER_LS: $DOCKER_LS"
   }
 else
   echo "Running on host system without docker wrapper"
   DOCKER_EXEC () {
     bash -c "export PATH=$BASE_SCRATCH_DIR/bins/:\$PATH && cd $P_CI_DIR && $*"
-    DCK_LS=$(docker exec $DOCKER_ID bash -c "pwd; ls")
+    DOCKER_LS=$(docker exec $DOCKER_ID bash -c "pwd; ls")
     echo "XXXXX2: DOCKER_LS: $DOCKER_LS"
   }
 fi
