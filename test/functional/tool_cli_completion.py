@@ -9,7 +9,6 @@ contrib/ folder match the RPC calls available.
 """
 
 from os import path
-from re import compile, MULTILINE, DOTALL
 from collections import defaultdict
 
 from test_framework.test_framework import BitcoinTestFramework
@@ -31,9 +30,6 @@ TYPED_OPTIONS = [
         ["sighashtype", {"ALL", "NONE", "SINGLE", "ALL|ANYONECANPAY",
                          "NONE|ANYONECANPAY", "SINGLE|ANYONECANPAY"}]
 ]
-
-# regexp to extract arguments from the help of a single command
-ARG_REGEXP = compile(r'.*Arguments\s*:\s*\n*(.*)\n*\s*Result', MULTILINE | DOTALL)
 
 
 class PossibleArgs():
@@ -61,6 +57,15 @@ class PossibleArgs():
 
     def set_unknwon_args(self, position):
         return self.set_args(position, {})
+
+    def set_typed_option(self, position, arg_name):
+        """ Checks if arg_name is a typed option; if it is, sets it and return True. """
+        for option_type in TYPED_OPTIONS:
+            if arg_name == option_type[0]:
+                self.set_args(position, option_type[1])
+                return True
+
+        return False
 
     def has_option(self, position):
         return position in self.arguments and len(self.arguments[position]) > 0
@@ -147,39 +152,28 @@ class CliCompletionTest(BitcoinTestFramework):
         )
 
     def parse_single_helper(self, option):
-        """ Complete the arguments of option via the RPC help command. """
+        """ Complete the arguments of option via the RPC format command. """
 
-        # if we can't find an argument list in the help text, then it has no option to add
-        regexp_res = ARG_REGEXP.match(self.nodes[0].help(option.command))
-        if regexp_res is None or regexp_res.group(1) is None:
+        res = self.nodes[0].format(command=option.command, output='args_cli')
+        if len(res) == 0:
             return option
 
-        # add options while looping over each first line of each argument
-        arg_idx = 0
-        for argument_line in [argl for argl in regexp_res.group(1).split('\n') if len(argl) > 0]:
-            new_argument_start = str(arg_idx+1)+". "
-            if argument_line.startswith(new_argument_start):
-                arg_idx += 1
-                argument = argument_line[len(new_argument_start):]
+        for idx, argument in enumerate(res.split(",")):
+            elems = argument.split(":")
 
-                # check if it's a special type option
-                for option_type in TYPED_OPTIONS:
-                    if argument.startswith(option_type[0]):
-                        option.set_args(arg_idx, option_type[1])
-                        continue
+            if option.set_typed_option(idx+1, elems[0]):
+                continue
 
-                # heuristic to try to guess when an argument is boolean
-                if " (boolean," in argument_line:
-                    option.set_bool_args(arg_idx)
-                    continue
+            if elems[1] == "boolean":
+                option.set_bool_args(idx+1)
+                continue
 
-                # heuristic to try to guess when an argument is a file
-                if " (string," in argument_line and "file" in argument_line:
-                    option.set_file_args(arg_idx)
-                    continue
+            if elems[1] == "file":
+                option.set_file_args(idx+1)
+                continue
 
-                if not option.has_option(arg_idx):
-                    option.set_unknwon_args(arg_idx)
+            if not option.has_option(idx+1):
+                option.set_unknwon_args(idx+1)
 
         return option
 

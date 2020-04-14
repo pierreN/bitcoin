@@ -576,20 +576,52 @@ UniValue logging(const JSONRPCRequest& request)
     return result;
 }
 
+static UniValue format(const JSONRPCRequest& request)
+{
+    RPCHelpMan{"format",
+        "\nFormat data we have about an RPC command in the format specified by output.\n",
+        {
+            {"command", RPCArg::Type::STR, RPCArg::Optional::NO, "Command to query" },
+            {"output",  RPCArg::Type::STR, RPCArg::Optional::NO, "Output format. Accepted values: args_cli" },
+        },
+        RPCResult{RPCResult::Type::STR, "data", "Formatted data about command."},
+        RPCExamples{""},
+    }.Check(request);
+
+    RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VSTR});
+    const std::string command = request.params[0].get_str();
+
+    JSONRPCRequest jreq(request);
+    jreq.fHelp = true;
+
+    try
+    {
+        tableRPC.execute(command, jreq);
+    }
+    catch (const UniValue& e)
+    {
+        // only catch exceptions thrown by the actor
+        if (e["code"].get_int() != RPC_MISC_ERROR) {
+          throw;
+        }
+
+        return e["message"];
+    }
+
+    return NullUniValue;
+}
+
 static UniValue echo(const JSONRPCRequest& request)
 {
-    if (request.fHelp)
-        throw std::runtime_error(
-            RPCHelpMan{"echo|echojson ...",
-                "\nSimply echo back the input arguments. This command is for testing.\n"
-                "\nIt will return an internal bug report when exactly 100 arguments are passed.\n"
-                "\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in "
-                "bitcoin-cli and the GUI. There is no server-side difference.",
-                {},
-                RPCResult{RPCResult::Type::NONE, "", "Returns whatever was passed in"},
-                RPCExamples{""},
-            }.ToString()
-        );
+    RPCHelpMan{"echo|echojson ...",
+        "\nSimply echo back the input arguments. This command is for testing.\n"
+        "\nIt will return an internal bug report when exactly 100 arguments are passed.\n"
+        "\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in "
+        "bitcoin-cli and the GUI. There is no server-side difference.",
+        {},
+        RPCResult{RPCResult::Type::NONE, "", "Returns whatever was passed in"},
+        RPCExamples{""},
+    }.Check(request);
 
     CHECK_NONFATAL(request.params.size() != 100);
 
@@ -614,6 +646,7 @@ static const CRPCCommand commands[] =
     /* Not shown in help */
     { "hidden",             "setmocktime",            &setmocktime,            {"timestamp"}},
     { "hidden",             "mockscheduler",          &mockscheduler,          {"delta_time"}},
+    { "hidden",             "format",                 &format,                 {"command", "output"}},
     { "hidden",             "echo",                   &echo,                   {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
     { "hidden",             "echojson",               &echo,                   {"arg0","arg1","arg2","arg3","arg4","arg5","arg6","arg7","arg8","arg9"}},
 };
@@ -622,3 +655,5 @@ static const CRPCCommand commands[] =
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
+
+extern CRPCTable tableRPC;

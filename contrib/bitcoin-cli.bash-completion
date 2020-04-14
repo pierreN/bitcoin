@@ -97,7 +97,7 @@ _bitcoin_cli() {
 
     if ((cword > 2)); then
         case ${words[cword-2]} in
-            converttopsbt|createwallet|decoderawtransaction|finalizepsbt|getblockheader|getmempoolancestors|getmempooldescendants|getrawtransaction|gettransaction|listreceivedbyaddress|listreceivedbylabel|setwalletflag|walletprocesspsbt)
+            converttopsbt|createwallet|decoderawtransaction|finalizepsbt|getblockheader|getmempoolancestors|getmempooldescendants|getrawtransaction|gettransaction|listreceivedbyaddress|listreceivedbylabel|setwalletflag|stop|walletprocesspsbt)
                 COMPREPLY=( $( compgen -W "false true" -- "$cur" ) )
                 return 0
                 ;;
