@@ -421,6 +421,11 @@ static inline JSONRPCRequest transformNamedArguments(const JSONRPCRequest& in, c
 
 UniValue CRPCTable::execute(const JSONRPCRequest &request) const
 {
+  return this->execute(request.strMethod, request);
+}
+
+UniValue CRPCTable::execute(const std::string& method, const JSONRPCRequest &request) const
+{
     // Return immediately if in warmup
     {
         LOCK(cs_rpcWarmup);
@@ -429,7 +434,7 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
     }
 
     // Find method
-    auto it = mapCommands.find(request.strMethod);
+    auto it = mapCommands.find(method);
     if (it != mapCommands.end()) {
         UniValue result;
         for (const auto& command : it->second) {
