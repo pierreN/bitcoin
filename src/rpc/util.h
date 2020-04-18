@@ -322,18 +322,29 @@ struct RPCExamples {
     std::string ToDescriptionString() const;
 };
 
-#define CALL_RPC_METHOD(rpc_name, json_request) [&] { const RPCMan& man = rpc_name(); return man.m_fun(man, json_request); }()
+#define CALL_RPC_METHOD(rpc_name, json_request) rpc_name().Run(json_request)
+
+enum class RPCManType {
+    RPCStandard,    //!< Standard RPC calls which calls Check automatically
+    RPCCustomCheck, //!< RPC calls where the actor needs a custom check instead of the Check function
+    RPCBeforeCheck, //!< RPC calls where the actor might return NullUniValue before the Check function
+};
 
 class RPCMan
 {
 public:
-    using RPCMethod = std::function<UniValue(const RPCMan&, const JSONRPCRequest&)>;
+    using RPCMethod = std::function<UniValue(const JSONRPCRequest&)>;
+    using RPCTestMethod = std::function<bool(const RPCMan&, const JSONRPCRequest&)>;
+
     RPCMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCMethod fun);
+    RPCMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCManType type, RPCTestMethod tfun, RPCMethod fun);
     struct HiddenArg {
         const std::string m_name;
         explicit HiddenArg(std::string name) : m_name{std::move(name)} {}
     };
-    RPCMan(std::string name, std::string description, HiddenArg hidden_arg, RPCResults results, RPCExamples examples, RPCMethod fun);
+    RPCMan(std::string name, std::string description, HiddenArg hidden_arg, RPCResults results, RPCExamples examples, RPCTestMethod tfun, RPCMethod fun);
+
+    void InitCheckNames(const std::vector<RPCArg>& args) const;
 
     std::string ToString() const;
     /** If the supplied number of args is neither too small nor too high */
@@ -343,17 +354,30 @@ public:
      * the user is asking for help information, and throw help when appropriate.
      */
     inline void Check(const JSONRPCRequest& request) const {
-        if (request.fHelp || !IsValidNumArgs(request.params.size())) {
+        if ((m_type != RPCManType::RPCCustomCheck && (request.fHelp || !IsValidNumArgs(request.params.size()))) ||
+            (m_type == RPCManType::RPCCustomCheck && m_tfun(*this, request))) {
             throw std::runtime_error(ToString());
         }
+    }
+    /**
+     * Launch the actual RPC call, running the necessary checks beforehand
+     */
+    inline UniValue Run(const JSONRPCRequest& request) const {
+        if (m_type == RPCManType::RPCBeforeCheck && m_tfun(*this, request))
+            return NullUniValue;
+
+        Check(request);
+        return m_fun(request);
     }
 
     std::vector<std::string> GetArgNames() const;
 
+    const RPCTestMethod m_tfun;  //!< m_tfun evaluates (resp. before) the Check function if m_type is RPCCustomCheck (resp. RPCBeforeCheck)
     const RPCMethod m_fun;
     const std::string m_name;
 
 private:
+    const RPCManType m_type;
     const std::string m_description;
     const std::string m_hidden_arg; //!< Only used when the RPC has one undocumented hidden arg and m_args is empty
     const std::vector<RPCArg> m_args;

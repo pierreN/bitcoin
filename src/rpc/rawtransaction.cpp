@@ -160,10 +160,8 @@ static RPCMan getrawtransaction()
             + HelpExampleCli("getrawtransaction", "\"mytxid\" false \"myblockhash\"")
             + HelpExampleCli("getrawtransaction", "\"mytxid\" true \"myblockhash\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     bool in_active_chain = true;
     uint256 hash = ParseHashV(request.params[0], "parameter 1");
     CBlockIndex* blockindex = nullptr;
@@ -246,10 +244,8 @@ static RPCMan gettxoutproof()
                     RPCResult::Type::STR, "data", "A string that is a serialized, hex-encoded data for the proof."
                 },
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     std::set<uint256> setTxids;
     uint256 oneTxid;
     UniValue txids = request.params[0].get_array();
@@ -338,10 +334,8 @@ static RPCMan verifytxoutproof()
                     }
                 },
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     CDataStream ssMB(ParseHexV(request.params[0], "proof"), SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS);
     CMerkleBlock merkleBlock;
     ssMB >> merkleBlock;
@@ -422,10 +416,8 @@ static RPCMan createrawtransaction()
             + HelpExampleRpc("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"[{\\\"address\\\":0.01}]\"")
             + HelpExampleRpc("createrawtransaction", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"[{\\\"data\\\":\\\"00010203\\\"}]\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {
         UniValue::VARR,
         UniValueType(), // ARR or OBJ, checked later
@@ -512,10 +504,8 @@ static RPCMan decoderawtransaction()
                     HelpExampleCli("decoderawtransaction", "\"hexstring\"")
             + HelpExampleRpc("decoderawtransaction", "\"hexstring\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL});
 
     CMutableTransaction mtx;
@@ -581,10 +571,8 @@ static RPCMan decodescript()
                     HelpExampleCli("decodescript", "\"hexstring\"")
             + HelpExampleRpc("decodescript", "\"hexstring\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR});
 
     UniValue r(UniValue::VOBJ);
@@ -659,11 +647,8 @@ static RPCMan combinerawtransaction()
                 RPCExamples{
                     HelpExampleCli("combinerawtransaction", R"('["myhex1", "myhex2", "myhex3"]')")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
-
     UniValue txs = request.params[0].get_array();
     std::vector<CMutableTransaction> txVariants(txs.size());
 
@@ -787,10 +772,8 @@ static RPCMan signrawtransactionwithkey()
                     HelpExampleCli("signrawtransactionwithkey", "\"myhex\" \"[\\\"key1\\\",\\\"key2\\\"]\"")
             + HelpExampleRpc("signrawtransactionwithkey", "\"myhex\", \"[\\\"key1\\\",\\\"key2\\\"]\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VARR, UniValue::VARR, UniValue::VSTR}, true);
 
     CMutableTransaction mtx;
@@ -853,10 +836,8 @@ static RPCMan sendrawtransaction()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("sendrawtransaction", "\"signedhex\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {
         UniValue::VSTR,
         UniValueType(), // VNUM or VSTR, checked inside AmountFromValue()
@@ -924,10 +905,8 @@ static RPCMan testmempoolaccept()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("testmempoolaccept", "[\"signedhex\"]")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {
         UniValue::VARR,
         UniValueType(), // VNUM or VSTR, checked inside AmountFromValue()
@@ -1115,10 +1094,8 @@ static RPCMan decodepsbt()
                 RPCExamples{
                     HelpExampleCli("decodepsbt", "\"psbt\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR});
 
     // Unserialize the transactions
@@ -1328,10 +1305,8 @@ static RPCMan combinepsbt()
                 RPCExamples{
                     HelpExampleCli("combinepsbt", R"('["mybase64_1", "mybase64_2", "mybase64_3"]')")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VARR}, true);
 
     // Unserialize the transactions
@@ -1385,10 +1360,8 @@ static RPCMan finalizepsbt()
                 RPCExamples{
                     HelpExampleCli("finalizepsbt", "\"psbt\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL}, true);
 
     // Unserialize the transactions
@@ -1467,11 +1440,8 @@ static RPCMan createpsbt()
                 RPCExamples{
                     HelpExampleCli("createpsbt", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"[{\\\"data\\\":\\\"00010203\\\"}]\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
-
     RPCTypeCheck(request.params, {
         UniValue::VARR,
         UniValueType(), // ARR or OBJ, checked later
@@ -1531,10 +1501,8 @@ static RPCMan converttopsbt()
                             "\nConvert the transaction to a PSBT\n"
                             + HelpExampleCli("converttopsbt", "\"rawtransaction\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VBOOL, UniValue::VBOOL}, true);
 
     // parse hex string from parameter
@@ -1596,10 +1564,8 @@ static RPCMan utxoupdatepsbt()
             RPCExamples {
                 HelpExampleCli("utxoupdatepsbt", "\"psbt\"")
             },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VARR}, true);
 
     // Unserialize the transactions
@@ -1686,10 +1652,8 @@ static RPCMan joinpsbts()
             RPCExamples {
                 HelpExampleCli("joinpsbts", "\"psbt\"")
             },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VARR}, true);
 
     // Unserialize the transactions
@@ -1809,10 +1773,8 @@ static RPCMan analyzepsbt()
             RPCExamples {
                 HelpExampleCli("analyzepsbt", "\"psbt\"")
             },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR});
 
     // Unserialize the transaction

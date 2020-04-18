@@ -16,12 +16,9 @@
 
 static RPCMan rpcNestedTest_rpc()
 {
-    return RPCMan{"rpcNestedTest", "test", {}, {}, RPCExamples{""}, [](const RPCMan& self, const JSONRPCRequest& request) -> UniValue {
-    if (request.fHelp) {
-        return "help message";
-    }
-    return request.params.write(0, 0);
-    }};
+    return RPCMan{"rpcNestedTest", "test", {}, {}, RPCExamples{""}, RPCManType::RPCCustomCheck,
+    [](const RPCMan& self, const JSONRPCRequest& request) { return request.fHelp; },
+    [](const JSONRPCRequest& request) { return request.params.write(0, 0); }};
 }
 
 static const CRPCCommand vRPCCommands[] =

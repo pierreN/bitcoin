@@ -417,15 +417,33 @@ struct Sections {
 };
 
 RPCMan::RPCMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCMethod fun)
-    : m_fun{std::move(fun)},
+    : m_type{RPCManType::RPCStandard},
+      m_fun{std::move(fun)},
       m_name{std::move(name)},
       m_description{std::move(description)},
       m_args{std::move(args)},
       m_results{std::move(results)},
       m_examples{std::move(examples)}
 {
+    InitCheckNames(args);
+}
+
+RPCMan::RPCMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCManType type, RPCTestMethod tfun, RPCMethod fun)
+    : m_type{type},
+      m_tfun{std::move(tfun)},
+      m_fun{std::move(fun)},
+      m_name{std::move(name)},
+      m_description{std::move(description)},
+      m_args{std::move(args)},
+      m_results{std::move(results)},
+      m_examples{std::move(examples)}
+{
+    InitCheckNames(args);
+}
+
+void RPCMan::InitCheckNames(const std::vector<RPCArg>& args) const {
     std::set<std::string> named_args;
-    for (const auto& arg : m_args) {
+    for (const auto& arg : args) {
         std::vector<std::string> names;
         boost::split(names, arg.m_names, boost::is_any_of("|"));
         // Should have unique named arguments
@@ -435,8 +453,10 @@ RPCMan::RPCMan(std::string name, std::string description, std::vector<RPCArg> ar
     }
 }
 
-RPCMan::RPCMan(std::string name, std::string description, HiddenArg hidden_arg, RPCResults results, RPCExamples examples, RPCMethod fun)
-    : m_fun{std::move(fun)},
+RPCMan::RPCMan(std::string name, std::string description, HiddenArg hidden_arg, RPCResults results, RPCExamples examples, RPCTestMethod tfun, RPCMethod fun)
+    : m_type{RPCManType::RPCCustomCheck},
+      m_tfun{std::move(tfun)},
+      m_fun{std::move(fun)},
       m_name{std::move(name)},
       m_description{std::move(description)},
       m_hidden_arg{std::move(hidden_arg.m_name)},
@@ -444,6 +464,7 @@ RPCMan::RPCMan(std::string name, std::string description, HiddenArg hidden_arg, 
       m_examples{std::move(examples)}
 {
 }
+
 
 std::string RPCResults::ToDescriptionString() const
 {

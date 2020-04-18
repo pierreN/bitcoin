@@ -40,10 +40,8 @@ static RPCMan getconnectioncount()
                     HelpExampleCli("getconnectioncount", "")
             + HelpExampleRpc("getconnectioncount", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -64,10 +62,8 @@ static RPCMan ping()
                     HelpExampleCli("ping", "")
             + HelpExampleRpc("ping", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -145,10 +141,8 @@ static RPCMan getpeerinfo()
                     HelpExampleCli("getpeerinfo", "")
             + HelpExampleRpc("getpeerinfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -251,22 +245,23 @@ static RPCMan addnode()
                 RPCExamples{
                     HelpExampleCli("addnode", "\"192.168.0.6:8333\" \"onetry\"")
             + HelpExampleRpc("addnode", "\"192.168.0.6:8333\", \"onetry\"")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCCustomCheck,
+        [&](const RPCMan& help, const JSONRPCRequest& request) -> bool
 {
     std::string strCommand;
     if (!request.params[1].isNull())
         strCommand = request.params[1].get_str();
-    if (request.fHelp || request.params.size() != 2 ||
-        (strCommand != "onetry" && strCommand != "add" && strCommand != "remove"))
-        throw std::runtime_error(
-            self.ToString());
 
+    return request.fHelp || !help.IsValidNumArgs(request.params.size()) || (strCommand != "onetry" && strCommand != "add" && strCommand != "remove");
+},
+        [&](const JSONRPCRequest& request) -> UniValue
+{
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
     std::string strNode = request.params[0].get_str();
 
+    const std::string strCommand = request.params[1].get_str();
     if (strCommand == "onetry")
     {
         CAddress addr;
@@ -307,10 +302,8 @@ static RPCMan disconnectnode()
             + HelpExampleRpc("disconnectnode", "\"192.168.0.6:8333\"")
             + HelpExampleRpc("disconnectnode", "\"\", 1")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -368,10 +361,8 @@ static RPCMan getaddednodeinfo()
                     HelpExampleCli("getaddednodeinfo", "\"192.168.0.201\"")
             + HelpExampleRpc("getaddednodeinfo", "\"192.168.0.201\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -440,9 +431,8 @@ static RPCMan getnettotals()
                     HelpExampleCli("getnettotals", "")
             + HelpExampleRpc("getnettotals", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
@@ -534,10 +524,8 @@ static RPCMan getnetworkinfo()
                     HelpExampleCli("getnetworkinfo", "")
             + HelpExampleRpc("getnetworkinfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
     UniValue obj(UniValue::VOBJ);
     obj.pushKV("version",       CLIENT_VERSION);
@@ -591,15 +579,17 @@ static RPCMan setban()
                     HelpExampleCli("setban", "\"192.168.0.6\" \"add\" 86400")
                             + HelpExampleCli("setban", "\"192.168.0.0/24\" \"add\"")
                             + HelpExampleRpc("setban", "\"192.168.0.6\", \"add\", 86400")
-                },
-        [&](const RPCMan& help, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCCustomCheck,
+        [&](const RPCMan& help, const JSONRPCRequest& request) -> bool
 {
     std::string strCommand;
     if (!request.params[1].isNull())
         strCommand = request.params[1].get_str();
-    if (request.fHelp || !help.IsValidNumArgs(request.params.size()) || (strCommand != "add" && strCommand != "remove")) {
-        throw std::runtime_error(help.ToString());
-    }
+
+    return request.fHelp || !help.IsValidNumArgs(request.params.size()) || (strCommand != "add" && strCommand != "remove");
+},
+        [&](const JSONRPCRequest& request) -> UniValue
+{
     if (!g_rpc_node->banman) {
         throw JSONRPCError(RPC_DATABASE_ERROR, "Error: Ban database not loaded");
     }
@@ -622,6 +612,7 @@ static RPCMan setban()
     if (! (isSubnet ? subNet.IsValid() : netAddr.IsValid()) )
         throw JSONRPCError(RPC_CLIENT_INVALID_IP_OR_SUBNET, "Error: Invalid IP/Subnet");
 
+    const std::string strCommand = request.params[1].get_str();
     if (strCommand == "add")
     {
         if (isSubnet ? g_rpc_node->banman->IsBanned(subNet) : g_rpc_node->banman->IsBanned(netAddr)) {
@@ -678,10 +669,8 @@ static RPCMan listbanned()
                     HelpExampleCli("listbanned", "")
                             + HelpExampleRpc("listbanned", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if(!g_rpc_node->banman) {
         throw JSONRPCError(RPC_DATABASE_ERROR, "Error: Ban database not loaded");
     }
@@ -717,9 +706,8 @@ static RPCMan clearbanned()
                     HelpExampleCli("clearbanned", "")
                             + HelpExampleRpc("clearbanned", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     if (!g_rpc_node->banman) {
         throw JSONRPCError(RPC_DATABASE_ERROR, "Error: Ban database not loaded");
     }
@@ -740,10 +728,8 @@ static RPCMan setnetworkactive()
                 },
                 RPCResult{RPCResult::Type::BOOL, "", "The value that was passed in"},
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if (!g_rpc_node->connman) {
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
     }
@@ -778,9 +764,8 @@ static RPCMan getnodeaddresses()
                     HelpExampleCli("getnodeaddresses", "8")
             + HelpExampleRpc("getnodeaddresses", "8")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     if (!g_rpc_node->connman) {
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
     }

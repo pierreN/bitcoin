@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <rpc/util.h>
+
 class CRPCTable;
 class CWallet;
 class JSONRPCRequest;
@@ -40,6 +42,7 @@ std::shared_ptr<CWallet> GetWalletForJSONRPCRequest(const JSONRPCRequest& reques
 
 void EnsureWalletIsUnlocked(const CWallet*);
 bool EnsureWalletIsAvailable(const CWallet*, bool avoidException);
+bool CheckWalletBusyFromRequest(const RPCMan& self, const JSONRPCRequest& request);
 LegacyScriptPubKeyMan& EnsureLegacyScriptPubKeyMan(CWallet& wallet, bool also_create = false);
 
 UniValue getaddressinfo(const JSONRPCRequest& request);

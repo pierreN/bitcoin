@@ -138,14 +138,8 @@ static RPCMan help()
                     RPCResult::Type::STR, "", "The help text"
                 },
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& jsonRequest) -> UniValue
+        [&](const JSONRPCRequest& jsonRequest) -> UniValue
 {
-    self.Check(jsonRequest);
-    if (jsonRequest.fHelp || jsonRequest.params.size() > 1)
-        throw std::runtime_error(
-            self.ToString()
-        );
-
     std::string strCommand;
     if (jsonRequest.params.size() > 0)
         strCommand = jsonRequest.params[0].get_str();
@@ -163,15 +157,16 @@ static RPCMan stop()
                 RPCMan::HiddenArg{"wait"},
                 RPCResult{RPCResult::Type::STR, "", "A string with the content '" + RESULT + "'"},
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& jsonRequest) -> UniValue
+        [&](const RPCMan& self, const JSONRPCRequest& jsonRequest) -> bool
 {
     // Accept the deprecated and ignored 'detach' boolean argument
     // Also accept the hidden 'wait' integer argument (milliseconds)
     // For instance, 'stop 1000' makes the call wait 1 second before returning
     // to the client (intended for testing)
-    if (jsonRequest.fHelp || jsonRequest.params.size() > 1)
-        throw std::runtime_error(
-            self.ToString());
+    return jsonRequest.fHelp || jsonRequest.params.size() > 1;
+},
+        [&](const JSONRPCRequest& jsonRequest) -> UniValue
+{
     // Event loop will exit after current HTTP requests have been handled, so
     // this reply will get back to the client.
     StartShutdown();
@@ -195,10 +190,8 @@ static RPCMan uptime()
                     HelpExampleCli("uptime", "")
                 + HelpExampleRpc("uptime", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     return GetTime() - GetStartupTime();
 }
     };
@@ -226,10 +219,8 @@ static RPCMan getrpcinfo()
                 RPCExamples{
                     HelpExampleCli("getrpcinfo", "")
                 + HelpExampleRpc("getrpcinfo", "")},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(g_rpc_server_info.mutex);
     UniValue active_commands(UniValue::VARR);
     for (const RPCCommandExecutionInfo& info : g_rpc_server_info.active_commands) {

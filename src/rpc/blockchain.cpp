@@ -182,10 +182,8 @@ static RPCMan getblockcount()
                     HelpExampleCli("getblockcount", "")
             + HelpExampleRpc("getblockcount", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-            self.Check(request);
-
     LOCK(cs_main);
     return ::ChainActive().Height();
 },
@@ -203,10 +201,8 @@ static RPCMan getbestblockhash()
                     HelpExampleCli("getbestblockhash", "")
             + HelpExampleRpc("getbestblockhash", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
     return ::ChainActive().Tip()->GetBlockHash().GetHex();
 },
@@ -241,9 +237,8 @@ static RPCMan waitfornewblock()
                     HelpExampleCli("waitfornewblock", "1000")
             + HelpExampleRpc("waitfornewblock", "1000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     int timeout = 0;
     if (!request.params[0].isNull())
         timeout = request.params[0].get_int();
@@ -285,9 +280,8 @@ static RPCMan waitforblock()
                     HelpExampleCli("waitforblock", "\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\" 1000")
             + HelpExampleRpc("waitforblock", "\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     int timeout = 0;
 
     uint256 hash(ParseHashV(request.params[0], "blockhash"));
@@ -333,9 +327,8 @@ static RPCMan waitforblockheight()
                     HelpExampleCli("waitforblockheight", "100 1000")
             + HelpExampleRpc("waitforblockheight", "100, 1000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
     int timeout = 0;
 
     int height = request.params[0].get_int();
@@ -370,10 +363,8 @@ static RPCMan syncwithvalidationinterfacequeue()
                     HelpExampleCli("syncwithvalidationinterfacequeue","")
             + HelpExampleRpc("syncwithvalidationinterfacequeue","")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     SyncWithValidationInterfaceQueue();
     return NullUniValue;
 },
@@ -391,10 +382,8 @@ static RPCMan getdifficulty()
                     HelpExampleCli("getdifficulty", "")
             + HelpExampleRpc("getdifficulty", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
     return GetDifficulty(::ChainActive().Tip());
 },
@@ -541,10 +530,8 @@ static RPCMan getrawmempool()
                     HelpExampleCli("getrawmempool", "true")
             + HelpExampleRpc("getrawmempool", "true")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     bool fVerbose = false;
     if (!request.params[0].isNull())
         fVerbose = request.params[0].get_bool();
@@ -573,10 +560,8 @@ static RPCMan getmempoolancestors()
                     HelpExampleCli("getmempoolancestors", "\"mytxid\"")
             + HelpExampleRpc("getmempoolancestors", "\"mytxid\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     bool fVerbose = false;
     if (!request.params[1].isNull())
         fVerbose = request.params[1].get_bool();
@@ -640,10 +625,8 @@ static RPCMan getmempooldescendants()
                     HelpExampleCli("getmempooldescendants", "\"mytxid\"")
             + HelpExampleRpc("getmempooldescendants", "\"mytxid\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     bool fVerbose = false;
     if (!request.params[1].isNull())
         fVerbose = request.params[1].get_bool();
@@ -698,10 +681,8 @@ static RPCMan getmempoolentry()
                     HelpExampleCli("getmempoolentry", "\"mytxid\"")
             + HelpExampleRpc("getmempoolentry", "\"mytxid\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash = ParseHashV(request.params[0], "parameter 1");
 
     const CTxMemPool& mempool = EnsureMemPool();
@@ -733,10 +714,8 @@ static RPCMan getblockhash()
                     HelpExampleCli("getblockhash", "1000")
             + HelpExampleRpc("getblockhash", "1000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     int nHeight = request.params[0].get_int();
@@ -785,10 +764,8 @@ static RPCMan getblockheader()
                     HelpExampleCli("getblockheader", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"")
             + HelpExampleRpc("getblockheader", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash(ParseHashV(request.params[0], "hash"));
 
     bool fVerbose = true;
@@ -908,10 +885,8 @@ static RPCMan getblock()
                     HelpExampleCli("getblock", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"")
             + HelpExampleRpc("getblock", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash(ParseHashV(request.params[0], "blockhash"));
 
     int verbosity = 1;
@@ -963,10 +938,8 @@ static RPCMan pruneblockchain()
                     HelpExampleCli("pruneblockchain", "1000")
             + HelpExampleRpc("pruneblockchain", "1000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if (!fPruneMode)
         throw JSONRPCError(RPC_MISC_ERROR, "Cannot prune blocks because node is not in prune mode.");
 
@@ -1031,10 +1004,8 @@ static RPCMan gettxoutsetinfo()
                     HelpExampleCli("gettxoutsetinfo", "")
             + HelpExampleRpc("gettxoutsetinfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     UniValue ret(UniValue::VOBJ);
 
     CCoinsStats stats;
@@ -1092,10 +1063,8 @@ static RPCMan gettxout()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("gettxout", "\"txid\", 1")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     UniValue ret(UniValue::VOBJ);
@@ -1155,10 +1124,8 @@ static RPCMan verifychain()
                     HelpExampleCli("verifychain", "")
             + HelpExampleRpc("verifychain", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     const int check_level(request.params[0].isNull() ? DEFAULT_CHECKLEVEL : request.params[0].get_int());
     const int check_depth{request.params[1].isNull() ? DEFAULT_CHECKBLOCKS : request.params[1].get_int()};
 
@@ -1288,10 +1255,8 @@ RPCMan getblockchaininfo()
                     HelpExampleCli("getblockchaininfo", "")
             + HelpExampleRpc("getblockchaininfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     const CBlockIndex* tip = ::ChainActive().Tip();
@@ -1380,10 +1345,8 @@ static RPCMan getchaintips()
                     HelpExampleCli("getchaintips", "")
             + HelpExampleRpc("getchaintips", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     /*
@@ -1493,10 +1456,8 @@ static RPCMan getmempoolinfo()
                     HelpExampleCli("getmempoolinfo", "")
             + HelpExampleRpc("getmempoolinfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     return MempoolInfoToJSON(EnsureMemPool());
 },
     };
@@ -1516,10 +1477,8 @@ static RPCMan preciousblock()
                     HelpExampleCli("preciousblock", "\"blockhash\"")
             + HelpExampleRpc("preciousblock", "\"blockhash\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash(ParseHashV(request.params[0], "blockhash"));
     CBlockIndex* pblockindex;
 
@@ -1555,10 +1514,8 @@ static RPCMan invalidateblock()
                     HelpExampleCli("invalidateblock", "\"blockhash\"")
             + HelpExampleRpc("invalidateblock", "\"blockhash\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash(ParseHashV(request.params[0], "blockhash"));
     BlockValidationState state;
 
@@ -1598,10 +1555,8 @@ static RPCMan reconsiderblock()
                     HelpExampleCli("reconsiderblock", "\"blockhash\"")
             + HelpExampleRpc("reconsiderblock", "\"blockhash\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 hash(ParseHashV(request.params[0], "blockhash"));
 
     {
@@ -1650,10 +1605,8 @@ static RPCMan getchaintxstats()
                     HelpExampleCli("getchaintxstats", "")
             + HelpExampleRpc("getchaintxstats", "2016")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     const CBlockIndex* pindex;
     int blockcount = 30 * 24 * 60 * 60 / Params().GetConsensus().nPowTargetSpacing; // By default: 1 month
 
@@ -1821,10 +1774,8 @@ static RPCMan getblockstats()
                     HelpExampleCli("getblockstats", "1000 '[\"minfeerate\",\"avgfeerate\"]'")
             + HelpExampleRpc("getblockstats", "1000 '[\"minfeerate\",\"avgfeerate\"]'")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     CBlockIndex* pindex;
@@ -2034,10 +1985,8 @@ static RPCMan savemempool()
                     HelpExampleCli("savemempool", "")
             + HelpExampleRpc("savemempool", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     const CTxMemPool& mempool = EnsureMemPool();
 
     if (!mempool.IsLoaded()) {
@@ -2168,10 +2117,8 @@ static RPCMan scantxoutset()
                         {RPCResult::Type::STR_AMOUNT, "total_amount", "The total amount of all found unspent outputs in " + CURRENCY_UNIT},
                     }},
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VARR});
 
     UniValue result(UniValue::VOBJ);
@@ -2285,10 +2232,8 @@ static RPCMan getblockfilter()
                     HelpExampleCli("getblockfilter", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\" \"basic\"") +
                     HelpExampleRpc("getblockfilter", "\"00000000c937983704a73af28acdec37b049d214adbda81d7e2a3dd146f6ed09\", \"basic\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint256 block_hash = ParseHashV(request.params[0], "blockhash");
     std::string filtertype_name = "basic";
     if (!request.params[1].isNull()) {
@@ -2377,10 +2322,8 @@ static RPCMan dumptxoutset()
         RPCExamples{
             HelpExampleCli("dumptxoutset", "utxo.dat")
         },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     fs::path path = fs::absolute(request.params[0].get_str(), GetDataDir());
     // Write to a temporary path and then move into `path` on completion
     // to avoid confusion due to an interruption.

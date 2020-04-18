@@ -49,10 +49,8 @@ static RPCMan validateaddress()
                     HelpExampleCli("validateaddress", "\"" + EXAMPLE_ADDRESS[0] + "\"") +
                     HelpExampleRpc("validateaddress", "\"" + EXAMPLE_ADDRESS[0] + "\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     bool isValid = IsValidDestination(dest);
 
@@ -101,10 +99,8 @@ static RPCMan createmultisig()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("createmultisig", "2, \"[\\\"03789ed0bb717d88f7d321a368d905e7430207ebbd82bd342cf11ae157a7ace5fd\\\",\\\"03dbc6764b8884a92e871274b87583e6d5c2a58819473e17e107ef3f6aa5a61626\\\"]\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     int required = request.params[0].get_int();
 
     // Get the public keys
@@ -165,10 +161,8 @@ static RPCMan getdescriptorinfo()
                 "Analyse a descriptor\n" +
                 HelpExampleCli("getdescriptorinfo", "\"wpkh([d34db33f/84h/0h/0h]0279be667ef9dcbbac55a06295Ce870b07029Bfcdb2dce28d959f2815b16f81798)\"")
             },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR});
 
     FlatSigningProvider provider;
@@ -215,10 +209,8 @@ static RPCMan deriveaddresses()
                 "First three native segwit receive addresses\n" +
                 HelpExampleCli("deriveaddresses", "\"wpkh([d34db33f/84h/0h/0h]xpub6DJ2dNUysrn5Vt36jH2KLBT2i1auw1tTSSomg8PhqNiUtx8QX2SvC9nrHu81fT41fvDUnhMjEzQgXnQjKEu3oaqMSzhSrHMxyyoEAmUHQbY/0/*)#cjjspncu\" \"[0,2]\"")
             },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValueType()}); // Range argument is checked later
     const std::string desc_str = request.params[0].get_str();
 
@@ -295,10 +287,8 @@ static RPCMan verifymessage()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("verifymessage", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX\", \"signature\", \"my message\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     std::string strAddress  = request.params[0].get_str();
@@ -343,10 +333,8 @@ static RPCMan signmessagewithprivkey()
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("signmessagewithprivkey", "\"privkey\", \"my message\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     std::string strPrivkey = request.params[0].get_str();
     std::string strMessage = request.params[1].get_str();
 
@@ -376,10 +364,8 @@ static RPCMan setmocktime()
                 },
                 RPCResult{RPCResult::Type::NONE, "", ""},
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if (!Params().IsMockableChain()) {
         throw std::runtime_error("setmocktime is for regression testing (-regtest mode) only");
     }
@@ -414,10 +400,8 @@ static RPCMan mockscheduler()
         },
         RPCResult{RPCResult::Type::NONE, "", ""},
         RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     if (!Params().IsMockableChain()) {
         throw std::runtime_error("mockscheduler is for regression testing (-regtest mode) only");
     }
@@ -506,10 +490,8 @@ static RPCMan getmemoryinfo()
                     HelpExampleCli("getmemoryinfo", "")
             + HelpExampleRpc("getmemoryinfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     std::string mode = request.params[0].isNull() ? "stats" : request.params[0].get_str();
     if (mode == "stats") {
         UniValue obj(UniValue::VOBJ);
@@ -579,10 +561,8 @@ static RPCMan logging()
                     HelpExampleCli("logging", "\"[\\\"all\\\"]\" \"[\\\"http\\\"]\"")
             + HelpExampleRpc("logging", "[\"all\"], [\"libevent\"]")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     uint32_t original_log_categories = LogInstance().GetCategoryMask();
     if (request.params[0].isArray()) {
         EnableOrDisableLogCategories(request.params[0], true);
@@ -638,11 +618,10 @@ static RPCMan echo(const std::string& name)
                     {"arg9", RPCArg::Type::STR, RPCArg::Optional::OMITTED_NAMED_ARG, ""},
                 },
                 RPCResult{RPCResult::Type::NONE, "", "Returns whatever was passed in"},
-                RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                RPCExamples{""}, RPCManType::RPCCustomCheck,
+        [&](const RPCMan& self, const JSONRPCRequest& request) { return request.fHelp; },
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    if (request.fHelp) throw std::runtime_error(self.ToString());
-
     CHECK_NONFATAL(request.params.size() != 100);
 
     return request.params;

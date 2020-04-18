@@ -95,10 +95,8 @@ static RPCMan getnetworkhashps()
                     HelpExampleCli("getnetworkhashps", "")
             + HelpExampleRpc("getnetworkhashps", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
     return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
 },
@@ -219,10 +217,8 @@ static RPCMan generatetodescriptor()
         },
         RPCExamples{
             "\nGenerate 11 blocks to mydesc\n" + HelpExampleCli("generatetodescriptor", "11 \"mydesc\"")},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     const int num_blocks{request.params[0].get_int()};
     const int64_t max_tries{request.params[2].isNull() ? 1000000 : request.params[2].get_int()};
 
@@ -259,10 +255,8 @@ static RPCMan generatetoaddress()
             + "If you are running the bitcoin core wallet, you can get a new address to send the newly generated bitcoin to with:\n"
             + HelpExampleCli("getnewaddress", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     int nGenerate = request.params[0].get_int();
     uint64_t nMaxTries = 1000000;
     if (!request.params[2].isNull()) {
@@ -307,10 +301,8 @@ static RPCMan generateblock()
             "\nGenerate a block to myaddress, with txs rawtx and mempool_txid\n"
             + HelpExampleCli("generateblock", R"("myaddress" '["rawtx", "mempool_txid"]')")
         },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     const auto address_or_descriptor = request.params[0].get_str();
     CScript coinbase_script;
     std::string error;
@@ -415,10 +407,8 @@ static RPCMan getmininginfo()
                     HelpExampleCli("getmininginfo", "")
             + HelpExampleRpc("getmininginfo", "")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
     const CTxMemPool& mempool = EnsureMemPool();
 
@@ -457,10 +447,8 @@ static RPCMan prioritisetransaction()
                     HelpExampleCli("prioritisetransaction", "\"txid\" 0.0 10000")
             + HelpExampleRpc("prioritisetransaction", "\"txid\", 0.0, 10000")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     uint256 hash(ParseHashV(request.params[0], "txid"));
@@ -589,10 +577,8 @@ static RPCMan getblocktemplate()
                     HelpExampleCli("getblocktemplate", "'{\"rules\": [\"segwit\"]}'")
             + HelpExampleRpc("getblocktemplate", "{\"rules\": [\"segwit\"]}")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     LOCK(cs_main);
 
     std::string strMode = "template";
@@ -934,10 +920,8 @@ static RPCMan submitblock()
                     HelpExampleCli("submitblock", "\"mydata\"")
             + HelpExampleRpc("submitblock", "\"mydata\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     std::shared_ptr<CBlock> blockptr = std::make_shared<CBlock>();
     CBlock& block = *blockptr;
     if (!DecodeHexBlk(block, request.params[0].get_str())) {
@@ -1000,10 +984,8 @@ static RPCMan submitheader()
                     HelpExampleCli("submitheader", "\"aabbcc\"") +
                     HelpExampleRpc("submitheader", "\"aabbcc\"")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     CBlockHeader h;
     if (!DecodeHexBlockHeader(h, request.params[0].get_str())) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block header decode failed");
@@ -1062,10 +1044,8 @@ static RPCMan estimatesmartfee()
                 RPCExamples{
                     HelpExampleCli("estimatesmartfee", "6")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VSTR});
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
     unsigned int max_target = ::feeEstimator.HighestTargetTracked(FeeEstimateHorizon::LONG_HALFLIFE);
@@ -1149,10 +1129,8 @@ static RPCMan estimaterawfee()
                 RPCExamples{
                     HelpExampleCli("estimaterawfee", "6 0.9")
                 },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    self.Check(request);
-
     RPCTypeCheck(request.params, {UniValue::VNUM, UniValue::VNUM}, true);
     RPCTypeCheckArgument(request.params[0], UniValue::VNUM);
     unsigned int max_target = ::feeEstimator.HighestTargetTracked(FeeEstimateHorizon::LONG_HALFLIFE);

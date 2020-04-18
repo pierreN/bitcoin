@@ -115,17 +115,11 @@ RPCMan importprivkey()
             + HelpExampleCli("importprivkey", "\"mykey\" \"\" false") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("importprivkey", "\"mykey\", \"testing\", false")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
     if (pwallet->IsWalletFlagSet(WALLET_FLAG_DISABLE_PRIVATE_KEYS)) {
         throw JSONRPCError(RPC_WALLET_ERROR, "Cannot import private keys to a wallet with private keys disabled");
     }
@@ -212,17 +206,10 @@ RPCMan abortrescan()
             + HelpExampleCli("abortrescan", "") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("abortrescan", "")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = GetWalletForJSONRPCRequest(request).get();
     if (!pwallet->IsScanning() || pwallet->IsAbortingRescan()) return false;
     pwallet->AbortRescan();
     return true;
@@ -255,17 +242,10 @@ RPCMan importaddress()
             + HelpExampleCli("importaddress", "\"myaddress\" \"testing\" false") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("importaddress", "\"myaddress\", \"testing\", false")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = GetWalletForJSONRPCRequest(request).get();
     EnsureLegacyScriptPubKeyMan(*pwallet, true);
 
     std::string strLabel;
@@ -348,16 +328,10 @@ RPCMan importprunedfunds()
                 },
                 RPCResult{RPCResult::Type::NONE, "", ""},
                 RPCExamples{""},
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = GetWalletForJSONRPCRequest(request).get();
     CMutableTransaction tx;
     if (!DecodeHexTx(tx, request.params[0].get_str()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX decode failed");
@@ -414,17 +388,10 @@ RPCMan removeprunedfunds()
                     HelpExampleCli("removeprunedfunds", "\"a8d0c0184dde994a09ec054286f1ce581bebf46446a512166eae7628734ea0a5\"") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("removeprunedfunds", "\"a8d0c0184dde994a09ec054286f1ce581bebf46446a512166eae7628734ea0a5\"")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
-    std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = GetWalletForJSONRPCRequest(request).get();
     auto locked_chain = pwallet->chain().lock();
     LOCK(pwallet->cs_wallet);
 
@@ -467,17 +434,11 @@ RPCMan importpubkey()
             + HelpExampleCli("importpubkey", "\"mypubkey\" \"testing\" false") +
             "\nAs a JSON-RPC call\n"
             + HelpExampleRpc("importpubkey", "\"mypubkey\", \"testing\", false")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
     EnsureLegacyScriptPubKeyMan(*wallet, true);
 
     std::string strLabel;
@@ -555,17 +516,11 @@ RPCMan importwallet()
             + HelpExampleCli("importwallet", "\"test\"") +
             "\nImport using the json rpc call\n"
             + HelpExampleRpc("importwallet", "\"test\"")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
     EnsureLegacyScriptPubKeyMan(*wallet, true);
 
     if (pwallet->chain().havePruned()) {
@@ -717,17 +672,11 @@ RPCMan dumpprivkey()
                     HelpExampleCli("dumpprivkey", "\"myaddress\"")
             + HelpExampleCli("importprivkey", "\"mykey\"")
             + HelpExampleRpc("dumpprivkey", "\"myaddress\"")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    const CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = wallet.get();
     LegacyScriptPubKeyMan& spk_man = EnsureLegacyScriptPubKeyMan(*wallet);
 
     auto locked_chain = pwallet->chain().lock();
@@ -773,17 +722,11 @@ RPCMan dumpwallet()
                 RPCExamples{
                     HelpExampleCli("dumpwallet", "\"test\"")
             + HelpExampleRpc("dumpwallet", "\"test\"")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& request) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& request) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(request);
-    const CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(request);
-
+    CWallet* const pwallet = wallet.get();
     LegacyScriptPubKeyMan& spk_man = EnsureLegacyScriptPubKeyMan(*wallet);
 
     auto locked_chain = pwallet->chain().lock();
@@ -1374,17 +1317,11 @@ RPCMan importmulti()
                     HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }, "
                                           "{ \"scriptPubKey\": { \"address\": \"<my 2nd address>\" }, \"label\": \"example 2\", \"timestamp\": 1455191480 }]'") +
                     HelpExampleCli("importmulti", "'[{ \"scriptPubKey\": { \"address\": \"<my address>\" }, \"timestamp\":1455191478 }]' '{ \"rescan\": false}'")
-                },
-        [&](const RPCMan& self, const JSONRPCRequest& mainRequest) -> UniValue
+                }, RPCManType::RPCBeforeCheck, CheckWalletBusyFromRequest,
+        [&](const JSONRPCRequest& mainRequest) -> UniValue
 {
     std::shared_ptr<CWallet> const wallet = GetWalletForJSONRPCRequest(mainRequest);
     CWallet* const pwallet = wallet.get();
-    if (!EnsureWalletIsAvailable(pwallet, mainRequest.fHelp)) {
-        return NullUniValue;
-    }
-
-    self.Check(mainRequest);
-
     RPCTypeCheck(mainRequest.params, {UniValue::VARR, UniValue::VOBJ});
 
     EnsureLegacyScriptPubKeyMan(*wallet, true);
