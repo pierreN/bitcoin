@@ -322,10 +322,18 @@ struct RPCExamples {
     std::string ToDescriptionString() const;
 };
 
-class RPCHelpMan
+#define CALL_RPC_METHOD(rpc_name, json_request) [&] { const RPCMan& man = rpc_name(); return man.m_fun(man, json_request); }()
+
+class RPCMan
 {
 public:
-    RPCHelpMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples);
+    using RPCMethod = std::function<UniValue(const RPCMan&, const JSONRPCRequest&)>;
+    RPCMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCMethod fun);
+    struct HiddenArg {
+        const std::string m_name;
+        explicit HiddenArg(std::string name) : m_name{std::move(name)} {}
+    };
+    RPCMan(std::string name, std::string description, HiddenArg hidden_arg, RPCResults results, RPCExamples examples, RPCMethod fun);
 
     std::string ToString() const;
     /** If the supplied number of args is neither too small nor too high */
@@ -340,9 +348,14 @@ public:
         }
     }
 
-private:
+    std::vector<std::string> GetArgNames() const;
+
+    const RPCMethod m_fun;
     const std::string m_name;
+
+private:
     const std::string m_description;
+    const std::string m_hidden_arg; //!< Only used when the RPC has one undocumented hidden arg and m_args is empty
     const std::vector<RPCArg> m_args;
     const RPCResults m_results;
     const RPCExamples m_examples;
